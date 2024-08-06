@@ -1,0 +1,35 @@
+import socket
+
+HOST = "127.0.0.1"  # The server's hostname or IP address
+PORT = 65432  # The port used by the server
+
+
+# Main function to run the client
+def main():
+    # Create a socket object
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        # Connect to the server
+        s.connect((HOST, PORT))
+        # Send a "start" message to initiate the game
+        s.sendall("start".encode())
+        # Loop to receive and send messages with the server
+        while True:
+            # Receive data from the server
+            data = s.recv(1024).decode()
+            # If no data received, break the loop
+            if not data:
+                break
+            # Print the received data
+            print(data)
+            # Break the loop if the game is won or lost
+            if "Congratulations" in data or "Sorry" in data:
+                break
+            # Prompt the user to guess a number
+            guess = input("Guess a number: ")
+            # Send the guess to the server
+            s.sendall(guess.encode())
+
+
+# Entry point of the script
+if __name__ == "__main__":
+    main()
