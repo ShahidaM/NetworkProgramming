@@ -1,0 +1,74 @@
+import socket
+import random
+
+HOST = "127.0.0.1"  # Standard loopback interface address (localhost)
+PORT = 65432  # Port to listen on (non-privileged ports are > 1023)
+
+
+# Function to generate a random number between 1 and 10
+def generate_random_number():
+    return random.randint(1, 10)
+
+
+# Function to play the "Guess the number" game
+def play_game(conn, random_number):
+    attempts = 0
+    # Allow the client only 5 attempts to guess the number
+    while attempts < 5:
+        # Receive data from the client
+        data = conn.recv(1024).decode()
+        # Break out of the loop if no data received
+        if not data:
+            break
+        # If the client sends "start", inform the client to start the game
+        if data == "start":
+            conn.sendall("Game started! Guess a number between 1 and 10.".encode())
+        else:
+            try:
+                guess = int(data)
+                # Check if the guessed number matches the random number
+                if guess == random_number:
+                    conn.sendall("Congratulations you did it.".encode())
+                    break
+                # If the guess is lower than the random number, inform the client
+                elif guess < random_number:
+                    conn.sendall("You guessed too small!".encode())
+                # If the guess is higher than the random number, inform the client
+                else:
+                    conn.sendall("You guessed too high!".encode())
+                # Increment the attempts counter
+                attempts += 1
+            except ValueError:
+                # If the client sends an invalid input, inform the client
+                conn.sendall("Invalid input! Please guess a number.".encode())
+    else:
+        # If the client exceeds 5 attempts, inform the client about the correct number
+        conn.sendall(
+            f"Sorry, you lost! The correct number was {random_number}.".encode()
+        )
+
+
+# Main function to run the server
+def main():
+    # Create a socket object
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        # Bind the socket to the host and port
+        s.bind((HOST, PORT))
+        # Listen for incoming connections
+        s.listen()
+        print(f"Server listening on {HOST}:{PORT}")
+        # Accept a client connection
+        conn, addr = s.accept()
+        # Connection established with the client
+        with conn:
+            print(f"Connected by {addr}")
+            # Generate a random number for the game
+            random_number = generate_random_number()
+            print(f"{random_number = }")
+            # Start playing the game with the client
+            play_game(conn, random_number)
+
+
+# Entry point of the script
+if __name__ == "__main__":
+    main()
