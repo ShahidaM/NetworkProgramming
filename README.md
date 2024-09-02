@@ -19,4 +19,8 @@ Server listening on 127.0.0.1:12345...
 Sent modified message back to ('127.0.0.1', 56660): Heelloo Woorld!
 
 Solution3 server & Client
-
+Write a Python script to create a TCP Server and Client using the Python socket standard library to develop a game "Guess the number".
+The game will follow as:
+1) The server will choose a random number between 1-10
+2) The client will have only 5 attempts to guess the correct number
+3) The client will only win if he guesses the correct number within 5 attempts.
