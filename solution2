@@ -1,0 +1,59 @@
+import socket
+import json
+
+HOST = "ip-api.com"
+PORT = 80
+
+request_text = """\
+GET /json HTTP/1.1\r\n\
+Host: ip-api.com\r\n\
+User-Agent: PythonSocketClient\r\n\
+Connection: close\r\n\
+\r\n\
+"""
+
+
+# Function to retrieve IP geolocation information
+def get_ip_geolocation():
+    # Create a socket object
+    client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+    # Connect to the server
+    client_socket.connect((HOST, PORT))
+
+    # Send the HTTP request
+    client_socket.sendall(request_text.encode())
+
+    # Receive the response
+    response = b""
+    while True:
+        data = client_socket.recv(4096)
+        if not data:
+            break
+        response += data
+
+    # Close the connection
+    client_socket.close()
+
+    # Extract JSON data from the response
+    json_data = response.split(b"\r\n\r\n")[-1]
+
+    try:
+        # Parse the JSON response
+        response_json = json.loads(json_data)
+
+        # Print the required information
+        print("query =", response_json["query"])
+        print("country =", response_json["country"])
+        print("regionName =", response_json["regionName"])
+        print("city =", response_json["city"])
+        print("lat =", response_json["lat"])
+        print("lon =", response_json["lon"])
+    except json.decoder.JSONDecodeError:
+        # Print error message if JSON decoding fails
+        print("Error: Failed to decode JSON response.")
+
+
+# Entry point of the script
+if __name__ == "__main__":
+    get_ip_geolocation()
